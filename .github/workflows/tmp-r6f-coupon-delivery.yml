@@ -7,6 +7,12 @@ on:
     paths:
       - "tmp-r6f-coupon-delivery/generate.py"
       - ".github/workflows/tmp-r6f-coupon-delivery.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "tmp-r6f-coupon-delivery/generate.py"
+      - ".github/workflows/tmp-r6f-coupon-delivery.yml"
 
 permissions:
   contents: write
