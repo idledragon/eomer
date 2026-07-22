@@ -14,12 +14,16 @@ on:
       - "tmp-r6f-coupon-delivery/generate.py"
       - ".github/workflows/tmp-r6f-coupon-delivery.yml"
 
+concurrency:
+  group: tmp-r6f-coupon-delivery
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
