@@ -133,11 +133,12 @@ for letter, side, depth in VARIANTS:
     mesh = make_coupon(letter, side, depth)
     stem = f"UH-RCV-WAL-001-R5-CAL-{letter}-SIDE-{side:.2f}-DEPTH-{depth:.2f}"
     validate(mesh, stem)
-    path = OUT / f"{stem}.stl"
     text = trimesh.exchange.stl.export_stl_ascii(mesh)
     if isinstance(text, bytes):
         text = text.decode("ascii")
+    path = OUT / f"{stem}.stl"
     path.write_text(text, encoding="ascii")
+    (OUT / f"{stem}.csv").write_text(text, encoding="ascii")
     reloaded = trimesh.load_mesh(path, process=True)
     validate(reloaded, stem + " reloaded")
     print(path.name, path.stat().st_size, reloaded.extents.tolist())
