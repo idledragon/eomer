@@ -1,0 +1,46 @@
+name: Temporary R6F coupon delivery
+
+on:
+  push:
+    branches:
+      - tmp-r6f-coupon-delivery-20260722
+    paths:
+      - "tmp-r6f-coupon-delivery/generate.py"
+      - ".github/workflows/tmp-r6f-coupon-delivery.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: tmp-r6f-coupon-delivery-20260722
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install geometry dependencies
+        run: |
+          python -m pip install --disable-pip-version-check \
+            numpy scipy trimesh manifold3d shapely mapbox_earcut
+
+      - name: Generate and validate individual coupons
+        run: |
+          python tmp-r6f-coupon-delivery/generate.py
+          test "$(find tmp-r6f-coupon-delivery/files -name '*.stl' | wc -l)" -eq 5
+
+      - name: Commit temporary delivery files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tmp-r6f-coupon-delivery/files/*.stl
+          if ! git diff --cached --quiet; then
+            git commit -m "Generate temporary individual R6F coupons [skip ci]"
+            git push origin HEAD:tmp-r6f-coupon-delivery-20260722
+          fi
