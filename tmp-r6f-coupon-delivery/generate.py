@@ -78,31 +78,13 @@ def validate(mesh: trimesh.Trimesh, name: str) -> None:
         raise RuntimeError(f"{name} validation failed: {checks}")
 
 
-def number(value: float) -> str:
-    value = float(value)
-    if abs(value) < 0.0000005:
-        value = 0.0
-    return format(value, ".9g")
-
-
-def compact_ascii(mesh: trimesh.Trimesh, solid_name: str) -> str:
-    lines = [f"solid {solid_name}"]
-    for normal, triangle in zip(mesh.face_normals, mesh.triangles):
-        n = " ".join(number(v) for v in normal)
-        vertices = " ".join(
-            "vertex " + " ".join(number(v) for v in vertex)
-            for vertex in triangle
-        )
-        lines.append(f"facet normal {n} outer loop {vertices} endloop endfacet")
-    lines.append(f"endsolid {solid_name}")
-    return "\n".join(lines) + "\n"
-
-
 for letter, side, depth in VARIANTS:
     mesh = make_coupon(side, depth)
     stem = f"UH-RCV-WAL-001-R5-CAL-{letter}-SIDE-{side:.2f}-DEPTH-{depth:.2f}"
     validate(mesh, stem)
-    text = compact_ascii(mesh, stem.replace("-", "_"))
+    text = trimesh.exchange.stl.export_stl_ascii(mesh)
+    if isinstance(text, bytes):
+        text = text.decode("ascii")
     path = OUT / f"{stem}.stl"
     path.write_text(text, encoding="ascii")
     (OUT / f"{stem}.csv").write_text(text, encoding="ascii")
