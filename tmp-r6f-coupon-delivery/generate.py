@@ -52,6 +52,12 @@ def extrude(poly: Polygon, z0: float, z1: float) -> trimesh.Trimesh:
     return clean(mesh)
 
 
+def box(x0: float, x1: float, y0: float, y1: float, z0: float, z1: float) -> trimesh.Trimesh:
+    mesh = trimesh.creation.box(extents=[x1-x0, y1-y0, z1-z0])
+    mesh.apply_translation([(x0+x1)/2.0, (y0+y1)/2.0, (z0+z1)/2.0])
+    return mesh
+
+
 def chamfered_rect(width: float, length: float, chamfer: float) -> Polygon:
     x0, x1 = -width/2.0, width/2.0
     y0, y1 = 0.0, length
@@ -107,11 +113,15 @@ def make_coupon(letter: str, side: float, depth: float) -> trimesh.Trimesh:
     for x in (-RAIL_CENTER_X, RAIL_CENTER_X):
         cutters.extend(channel_with_leadins(x, side, depth))
 
+    # A–E are identified by one through five simple rectangular edge notches.
+    # This avoids the heavy triangulation caused by circular holes while keeping
+    # identification clear and leaving the rail test geometry untouched.
     count = ord(letter)-ord("A")+1
-    for x in np.linspace(-8.0, 8.0, count):
-        hole = trimesh.creation.cylinder(radius=1.4, height=BODY_T+1.0, sections=48)
-        hole.apply_translation([float(x), BODY_L-5.0, BODY_T/2.0])
-        cutters.append(hole)
+    pitch = 4.0
+    start = -(count-1)*pitch/2.0
+    for index in range(count):
+        x = start + index*pitch
+        cutters.append(box(x-0.9, x+0.9, BODY_L-3.0, BODY_L+0.5, -0.2, BODY_T+0.2))
     return difference(body, cutters)
 
 
