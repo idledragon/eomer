@@ -44,13 +44,14 @@ jobs:
         run: |
           python tmp-r6f-coupon-delivery/generate.py
           test "$(find tmp-r6f-coupon-delivery/files -name '*.stl' | wc -l)" -eq 5
+          test "$(find tmp-r6f-coupon-delivery/files -name '*.csv' | wc -l)" -eq 5
 
       - name: Commit temporary delivery files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tmp-r6f-coupon-delivery/files/*.stl
+          git add tmp-r6f-coupon-delivery/files/*.stl tmp-r6f-coupon-delivery/files/*.csv
           if ! git diff --cached --quiet; then
-            git commit -m "Generate temporary individual R6F coupons [skip ci]"
+            git commit -m "Generate temporary individual R6F coupons and mirrors [skip ci]"
             git push origin HEAD:tmp-r6f-coupon-delivery-20260722
           fi
